@@ -1,76 +1,40 @@
-import React, { Component, Fragment } from "react";
-import { createPortal } from "react-dom";
+import React, { Component } from "react";
 
-const BoundaryHOC = ProtecedComponent =>
-  class Boundary extends Component {
-    state = {
-      hasError: false
+const MAX_NOVELS = 20;
+
+const readNovel = (state, props) => {
+  const { novels } = state;
+  if (novels < MAX_NOVELS) {
+    return {
+      novels: novels + 1
     };
+  } else {
+    return null;
+  }
+};
 
-    componentDidCatch = () => {
-      this.setState({
-        hasError: true
-      });
-    };
-
-    render() {
-      const { hasError } = this.state;
-      if (hasError) {
-        return <ErrorFallback />;
-      } else {
-        return <ProtecedComponent />;
-      }
-    }
-  };
-
-class ErrorMaker extends Component {
+class Controlled extends Component {
   state = {
-    friends: ["junsik", "JEONGMIN", "hyoseon", "hyensu"]
-  };
-
-  componentDidMount = () => {
-    setTimeout(() => {
-      this.setState({
-        friends: undefined
-      });
-    }, 2000);
+    novels: 0
   };
 
   render() {
-    const { friends } = this.state;
-    return friends.map(friend => ` ${friend} `);
+    const { novels } = this.state;
+    return (
+      <button onClick={this._handleClick}>{`I have read ${novels} ${
+        novels === 1 ? "novel" : "novels"
+      }`}</button>
+    );
   }
+  _handleClick = () => {
+    this.setState(readNovel);
+  };
 }
-
-class Portals extends Component {
-  render() {
-    return createPortal(<Message />, document.getElementById("touchMe"));
-  }
-}
-
-class ReturnString extends Component {
-  render() {
-    return "hello";
-  }
-}
-
-const Message = () => "I could touch you s-o-o-o-n . . .";
-const ErrorFallback = () => "Sorry something went wrong!";
-
-const PPortals = BoundaryHOC(Portals);
-const PErrorMaker = BoundaryHOC(ErrorMaker);
-const PReturnString = BoundaryHOC(ReturnString);
 
 class App extends Component {
   render() {
-    return (
-      <Fragment>
-        <PPortals />
-        <PErrorMaker />
-        <PReturnString />
-      </Fragment>
-    );
+    return <Controlled />;
   }
 }
 
-export default BoundaryHOC(App);
+export default App;
